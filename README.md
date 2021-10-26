@@ -42,7 +42,7 @@ Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts
 
 - [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666) 
 - [Ray and Tune](https://docs.ray.io/en/latest/installation.html)
-- [tensorboardX](https://github.com/lanpa/tensorboardX)
+- [TensorboardX](https://github.com/lanpa/tensorboardX)
 
 
 ### How to Run
