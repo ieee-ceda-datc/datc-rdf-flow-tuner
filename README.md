@@ -9,7 +9,7 @@ This scripts also available at [OpenROAD-flow-scripts commit](https://github.com
 * [Citation](#citation)
 
 ## Repository Structure
-The repository contains the **'config preset'** folder and **'scripts'** in the top. 
+The repository contains the **'config_preset'** folder and **'scripts'** in the top. 
 
 
 ### scripts
@@ -27,7 +27,7 @@ Supported searching algorithms are as follows.
 - Evolutionary Algorithm ([Nevergrad](https://github.com/facebookresearch/nevergrad))
 
 
-### config preset
+### config_preset
 Each config preset includes the pre-defined input hyperparameter name, type, range and step size for specific platform and design testcase as a JSON format. When type is int and step = 0, it means constant value. When type is float and step = 0, it means continuous range. User can manually modify or make a new config JSON file to define the input hyperparameters.
 
 
