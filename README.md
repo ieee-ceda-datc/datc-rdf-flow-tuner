@@ -26,6 +26,9 @@ Supported searching algorithms are as follows.
 - Tree Parzen Estimator + Covariance Matrix Adaptation Evolution Strategy ([Optuna](https://optuna.org/))
 - Evolutionary Algorithm ([Nevergrad](https://github.com/facebookresearch/nevergrad))
 
+User-settable coefficient values (Cpower ⋅ Cperform ⋅ Carea) of three objectives to set the direction of tuning are written in the each scripts.
+
+
 
 ### config_preset
 Each config preset includes the pre-defined input hyperparameter name, type, range and step size for specific platform and design testcase as a JSON format. When type is int and step = 0, it means constant value. When type is float and step = 0, it means continuous range. User can manually modify or make a new config JSON file to define the input hyperparameters.
