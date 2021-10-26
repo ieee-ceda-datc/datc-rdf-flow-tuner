@@ -1,6 +1,6 @@
 # datc-rdf-flow-tuner
 The flow-tuner repository consists of AutoTuner (blockbox hyperparameter optimization) for RTL-to-GDS flow, along with config json preset files and scripts, using the open-source RTL-to-GDS flow of the [OpenROAD tool](https://github.com/The-OpenROAD-Project) and [METRICS2.1](https://github.com/ieee-ceda-datc/datc-rdf-Metrics4ML), an open-source format for collecting design and tool metrics for an RTL-to-GDS flow.
-This scripts also available at [OpenROAD-flow-scripts commit](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666), and this repo will update continusioly to follow the OpenROAD AutoTuner.
+This scripts originate from [OpenROAD-flow-scripts commit](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666), and this repo will update continusioly to follow the OpenROAD-flow-scripts AutoTuner.
 
 
 ## Contents
