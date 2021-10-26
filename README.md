@@ -1,5 +1,5 @@
 # datc-rdf-flow-tuner
-The flow-tuner repository consists of AutoTuner (blackbox hyperparameter optimization) for RTL-to-GDS flow, along with config json preset files and scripts, using the open-source RTL-to-GDS flow of the [OpenROAD tool](https://github.com/The-OpenROAD-Project) and [METRICS2.1](https://github.com/ieee-ceda-datc/datc-rdf-Metrics4ML), an open-source format for collecting design and tool metrics for an RTL-to-GDS flow.
+The flow-tuner repository consists of AutoTuner (blackbox hyperparameter optimization) for RTL-to-GDS flow, along with config JSON preset files and scripts, using the open-source RTL-to-GDS flow of the [OpenROAD tool](https://github.com/The-OpenROAD-Project) and [METRICS2.1](https://github.com/ieee-ceda-datc/datc-rdf-Metrics4ML), an open-source format for collecting design and tool metrics for an RTL-to-GDS flow.
 This repo is originated from [OpenROAD-flow-scripts commit](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666), and this repo will update continuously to follow the OpenROAD-flow-scripts AutoTuner.
 
 
@@ -16,7 +16,7 @@ The repository contains the **'config_preset'** folder and **'scripts'** in the 
 This directory contains main top-level script files. Script files are divided according to each searching algorithm. 
 
 The script calls [genMassive.py](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/2e0de4384ca207593c80aa297064f62187b0c666/flow/util/genMassive.py) script to generate runscript for OpenROAD flow. 
-The script also calls [genMetrics.py](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/2e0de4384ca207593c80aa297064f62187b0c666/flow/util/genMetrics.py) script to collect the metrics json file.
+The script also calls [genMetrics.py](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/2e0de4384ca207593c80aa297064f62187b0c666/flow/util/genMetrics.py) script to collect the metrics JSON file.
 
 Supported searching algorithms are as follows.
 - Random/Grid Search 
@@ -26,12 +26,12 @@ Supported searching algorithms are as follows.
 - Tree Parzen Estimator + Covariance Matrix Adaptation Evolution Strategy ([Optuna](https://optuna.org/))
 - Evolutionary Algorithm ([Nevergrad](https://github.com/facebookresearch/nevergrad))
 
-User-settable coefficient values (Cpower ⋅ Cperform ⋅ Carea) of three objectives to set the direction of tuning are written in the each scripts.
+User-settable coefficient values (Cpower ⋅ Cperform ⋅ Carea) of three objectives to set the direction of tuning are written in each script.
 
 
 
 ### config_preset
-Each config preset includes the pre-defined input hyperparameter name, type, range and step size for specific platform and design testcase as a JSON format. When type is int and step = 0, it means constant value. When type is float and step = 0, it means continuous range. User can manually modify or make a new config JSON file to define the input hyperparameters.
+Each config preset includes the pre-defined input hyperparameter name, type, range and step size for a specific platform and design testcase as a JSON format. When type is int and step = 0, it means constant value. When type is float and step = 0, it means continuous range. Users can manually modify or make a new config JSON file to define the input hyperparameters.
 
 
 
@@ -40,7 +40,7 @@ Each config preset includes the pre-defined input hyperparameter name, type, ran
 
 ### Requirements
 To run AutoTuner scripts, it requires [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666). 
-Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts, and uses Python APIs, Ray and Tune. Thus, the following are required.
+Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts and uses Python APIs, Ray and Tune. Thus, the following are required.
 
 
 - [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666) and related packages
@@ -62,8 +62,8 @@ Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts
 
 
 ### GUI 
-Basically, progress is displayed at the terminal where you run, and when all runs are finished, the the results are displayed. 
-You could find the "Best config found" in the screen.
+Basically, progress is displayed at the terminal where you run, and when all runs are finished, the results are displayed. 
+You could find the "Best config found" on the screen.
 
 To use TensorBoard GUI, run "tensorboard --logdir=./util/autotuner/results/{your experimental name}". While TensorBoard running, you can open the webpage http://localhost:6006/ to see the GUI.
 
