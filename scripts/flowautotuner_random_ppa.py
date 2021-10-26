@@ -23,6 +23,7 @@ from ray.tune.suggest.basic_variant import BasicVariantGenerator
 
 # Global Variables
 autotunerPath = "util/autotuner"
+coeffPerform, coeffPower, coeffArea = 10000, 100, 100
 
 # User-defined evaluation function
 # It can change in any form to minimize the score (return value)
@@ -108,7 +109,6 @@ def evaluation_fn_ppa_improv(step, clk, ws, ndrc, power, util):
     else:
         effClkPeriodRef = (clkRef - wsRef)
     # Coefficient shoule be 0 to 100
-    coeffPerform, coeffPower, coeffArea = 10000, 100, 100
     improvPerform = 100 * (effClkPeriodRef - effClkPeriod) / effClkPeriodRef
     improvPower = 100 * (powerRef - power) / powerRef
     #improvArea = 100 * ((1/utilRef) - (1/util)) / (1/utilRef)
