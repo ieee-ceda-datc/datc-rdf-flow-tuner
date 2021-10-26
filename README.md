@@ -40,8 +40,8 @@ To run AutoTuner scripts, it requires [OpenROAD-flow-scripts](https://github.com
 Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts, and uses Python APIs, Ray and Tune. Thus, the following are required.
 
 
-- [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666) 
-- [Ray and Tune](https://docs.ray.io/en/latest/installation.html)
+- [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666) and related packages
+- [Ray and Tune](https://docs.ray.io/en/latest/installation.html) and related packages
 - [TensorboardX](https://github.com/lanpa/tensorboardX)
 
 
