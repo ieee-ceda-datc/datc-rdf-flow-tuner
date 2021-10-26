@@ -49,11 +49,11 @@ Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts
 1. Place the scripts under the 'flow/util/autotuner' directory in the [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666) installed path.
 
 2. Set the input arguments of the scripts.
-- p {platform}: platform. E.g., sky130hd
-- d {design}: design. E.g., ibex
-- e {experiment name}: user-defined experiment name. This name is used to the created directory in the flow/util/autotuner/results/{experiment name}
-- j {number of jobs}: set the number of concurrent jobs. (***Beware of memory usage)
-- n (number of trials): set the target number of trials. (***500~1000 is appropriate)
+- -p {platform}: platform. E.g., sky130hd
+- -d {design}: design. E.g., ibex
+- -e {experiment name}: user-defined experiment name. This name is used to the created directory in the flow/util/autotuner/results/{experiment name}
+- -j {number of jobs}: set the number of concurrent jobs. (***Beware of memory usage)
+- -n (number of trials): set the target number of trials. (***500~1000 is appropriate)
 
 3. Run python script with the from 'flow/' directory.
 
