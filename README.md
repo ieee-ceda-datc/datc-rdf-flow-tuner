@@ -5,7 +5,7 @@ This scripts also available at [OpenROAD-flow-scripts commit](https://github.com
 
 ## Contents
 * [Repository Structure](#repository-structure)
-* [AutoTuner: Getting Started](#autoTuner:-getting-started)
+* [AutoTuner: Getting Started](#autotuner-getting-started)
 * [Citation](#citation)
 
 ## Repository Structure
@@ -67,4 +67,4 @@ To use TensorBoard GUI, run "tensorboard --logdir=./util/autotuner/results/{your
 ## Citation
 Please cite the following paper
 
-J. Jung, A. B. Kahng, S. Kim and R. Varadarajan, "METRICS2.1 and Flow Tuning in the IEEE CEDA Robust Design Flow and OpenROAD", Proc. ACM/IEEE International Conference on Computer-Aided Design, 2021. (Invited) 
+* J. Jung, A. B. Kahng, S. Kim and R. Varadarajan, "METRICS2.1 and Flow Tuning in the IEEE CEDA Robust Design Flow and OpenROAD", Proc. ACM/IEEE International Conference on Computer-Aided Design, 2021. (Invited) 
