@@ -25,6 +25,7 @@ The script also calls [genMetrics.py](https://github.com/The-OpenROAD-Project/Op
 
 User-settable coefficient values (`C_power`, `C_perform`, `C_area`) of three objectives to set the direction of tuning are written in each script.
 Each coefficient is expressed as a global variable at the top of each script.  (coeffPerform=`C_perform`, coeffPower=`C_power` and coeffArea=`C_area`)
+Efforts to optimize according to the ratio of the coefficient become proportional.
 
 ### `config_preset`
 
