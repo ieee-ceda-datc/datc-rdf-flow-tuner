@@ -24,7 +24,7 @@ The script calls [genMassive.py](https://github.com/The-OpenROAD-Project/OpenROA
 The script also calls [genMetrics.py](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/2e0de4384ca207593c80aa297064f62187b0c666/flow/util/genMetrics.py) to collect the metrics JSON file.
 
 User-settable coefficient values (`C_power`, `C_perform`, `C_area`) of three objectives to set the direction of tuning are written in each script.
-
+Each coefficient is expressed as a global variable at the top of each script.  (coeffPerform=`C_perform`, coeffPower=`C_power` and coeffArea=`C_area`)
 
 ### `config_preset`
 
