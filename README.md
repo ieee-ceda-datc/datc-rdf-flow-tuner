@@ -7,11 +7,11 @@ This repo is originated from the official [OpenROAD-flow-scripts](https://github
 
 ## Repository Structure
 
-The repository consists of two sub-directories: `scripts` and `config_preset`.
+The repository consists of two subdirectories: `scripts` and `config_preset`.
 
 ### `scripts`
 
-This directory contains top-level Python scripts, each of which implements different search algorithm. Currently supported search algorithms are as follows.
+This directory contains top-level Python scripts, each of which implements a different search algorithm. Currently supported search algorithms are as follows.
 
 * Random/Grid Search 
 * Population Based Training ([PBT](https://deepmind.com/blog/article/population-based-training-neural-networks))
@@ -24,12 +24,12 @@ The script calls [genMassive.py](https://github.com/The-OpenROAD-Project/OpenROA
 The script also calls [genMetrics.py](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/2e0de4384ca207593c80aa297064f62187b0c666/flow/util/genMetrics.py) to collect the metrics JSON file.
 
 User-settable coefficient values (`C_power`, `C_perform`, `C_area`) of three objectives to set the direction of tuning are written in each script.
-Each coefficient is expressed as a global variable at the top of each script.  (coeffPerform=`C_perform`, coeffPower=`C_power` and coeffArea=`C_area`)
-Efforts to optimize according to the ratio of the coefficient become proportional.
+Each coefficient is expressed as a global variable at the top of each script (coeffPerform=`C_perform`, coeffPower=`C_power` and coeffArea=`C_area`).
+Efforts to optimize each of the objectives are proportional to the specified coefficients.
 
 ### `config_preset`
 
-This directory contains a set of pre-defined input parameter config files.
+This directory contains a set of predefined input parameter config files.
 Each config file defines a set of tunable tool parameters, described as JSON objects.
 Here's an example of the config file ([config_fmax_asap7-gcd.json](./config_preset/config_fmax_asap7-gcd.json)).
 
@@ -51,7 +51,7 @@ Here's an example of the config file ([config_fmax_asap7-gcd.json](./config_pres
 }
 ```
 
-Each parameter is defined with a key-value pair, where the key defines the parameter name, and the value is another JSON object defining the parameter specification, which has `type`, `minmax`, and `step` attributes. Attribute `type` defines the data type of the parameter, and `minmax` defines the range of it. When `type` is `int` and `step` is `0`, it defines a constant parameter. When `type` is `float` and `step` is `0`, it defines a continuous real parameter. 
+Each parameter is defined with a key-value pair, where the key defines the parameter name, and the value is another JSON object defining the parameter specification, which has `type`, `minmax`, and `step` attributes. Attribute `type` defines the data type of the parameter, and `minmax` defines the parameter's range. When `type` is `int` and `step` is `0`, this defines a constant parameter. When `type` is `float` and `step` is `0`, this defines a continuous real parameter. 
 
 Users can manually modify or make their own config JSON file to define the tunable parameters.
 
@@ -76,11 +76,11 @@ Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts
 
     - `-p <platform>`: platform, e.g., `sky130hd`.
     - `-d <design>`: design, e.g., `ibex`.
-    - `-e <experiment name>`: user-defined experiment name. This name is used to create workspace in `flow/util/autotuner/results/<experiment name>`
+    - `-e <experiment name>`: user-defined experiment name. The experiment workspace will be created in `flow/util/autotuner/results/<experiment name>`.
     - `-j <number of jobs>`: set the number of concurrent jobs. (**Beware of memory usage**.)
     - `-n <number of trials>`: set the target number of trials. (**500~1000 is appropriate.)
 
-3. Run Python script with the from `flow/` directory.
+3. Run Python script at the `flow/` directory.
 
 
 ### GUI 
@@ -88,7 +88,7 @@ Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts
 Basically, progress is displayed at the terminal where you run, and when all runs are finished, the results are displayed. 
 You could find the "Best config found" on the screen.
 
-To use TensorBoard GUI, run `tensorboard --logdir=./util/autotuner/results/<experimental name>`. While TensorBoard running, you can open the webpage http://localhost:6006/ to see the GUI.
+To use TensorBoard GUI, run `tensorboard --logdir=./util/autotuner/results/<experimental name>`. While TensorBoard is running, you can open the webpage http://localhost:6006/ to see the GUI.
 
 ## Citation
 
