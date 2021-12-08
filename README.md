@@ -97,16 +97,18 @@ Note: the order of the parameters matter. Arguments --design, --platform and
 --config are always required and should precede <mode>.
  
 AutoTuner:
-    python3 distributed.py tune -h
-Example:
+    ```python3 distributed.py tune -h```
+    
+    Detailed example:
     python3 distributed.py --design gcd --platform sky130hd \
                            --config ../designs/sky130hd/gcd/autotuner.json \
                            tune
     
  
 Parameter sweeping:
-    python3 distributed.py sweep -h
-    Example:
+    ```python3 distributed.py sweep -h```
+    
+    Detailed example:
     python3 distributed.py --design gcd --platform sky130hd \
                            --config distributed-sweep-example.json \
                            sweep
