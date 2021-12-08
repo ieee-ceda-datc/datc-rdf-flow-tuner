@@ -2,9 +2,22 @@
 
 This repository provides _AutoTuner_, a "no-human-in-loop" parameter tuning framework for commercial and academic RTL-to-GDS flows. AutoTuner provides a generic interface where users can define parameter configuration as JSON objects. This enables AutoTuner to easily support various tools and flows. AutoTuner also utilizes [METRICS2.1](https://github.com/ieee-ceda-datc/datc-rdf-Metrics4ML) to capture PPA of individual search trials. With the abundant features of METRICS2.1, users can explore various reward functions that steer the flow autotuning to different PPA goals.
 
-This repo is originated from the official AutoTuner in the `flow/util/autotuner/` directory in [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666) repository (the pointed repository's commit uses an older specification of METRICS2.1. The metrics name changes
-to the latest version is shown in [METRICS2.1_V2 changes](https://github.com/ieee-ceda-datc/datc-rdf-Metrics4ML/blob/bd9d40cabce72385c31a3867dfc39ae7da328134/METRICS2.1_V2_changes.md)), and is to be updated continuously. 
+This repo is originated from the official AutoTuner in the `flow/util/autotuner/` directory in [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/a102324a030796b99b164a1f83b54da514860342) (ORFS) repository, and is to be updated continuously. 
 
+AutoTuner provides two main functionalities as follows.
+* Automatic hyperparameter tuning framework for ORFS
+* Parametric sweeping experiments for ORFS
+
+
+## Changelog
+
+12/07/2021 - Update AutoTuner v2 version. The detailed changes are as follows.
+* Change the location and the name of the script in ORFS repository
+* Support for parameter sweeping experiments
+* Integrate scripts that were divided by search algorithm into one (distributed.py)
+* Support job distribution feature by using multiple Google cloud platform (GCP) instances
+
+10/25/2021 - Commit AutoTuner v1 version (autotuner-v1 tag in the ORFS repository [link](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tags)).
 
 ## Repository Structure
 
@@ -21,34 +34,36 @@ This directory contains top-level Python scripts, each of which implements a dif
 * Tree Parzen Estimator + Covariance Matrix Adaptation Evolution Strategy ([Optuna](https://optuna.org/))
 * Evolutionary Algorithm ([Nevergrad](https://github.com/facebookresearch/nevergrad))
 
-The script calls [genMassive.py](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/2e0de4384ca207593c80aa297064f62187b0c666/flow/util/genMassive.py) to generate run script for the OpenROAD flow. 
-The script also calls [genMetrics.py](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/blob/2e0de4384ca207593c80aa297064f62187b0c666/flow/util/genMetrics.py) to collect the METRICS2.1 JSON file.
-
-User-settable coefficient values (`C_power`, `C_perform`, `C_area`) of three objectives to set the direction of tuning are written in each script.
-Each coefficient is expressed as a global variable at the top of each script (coeffPerform=`C_perform`, coeffPower=`C_power` and coeffArea=`C_area`).
+User-settable coefficient values (`C_power`, `C_perform`, `C_area`) of three objectives to set the direction of tuning are written in the script.
+Each coefficient is expressed as a global variable at the top of the script (coeff_erform=`C_perform`, coeff_power=`C_power` and coeff_area=`C_area`).
 Efforts to optimize each of the objectives are proportional to the specified coefficients.
+
 
 ### `config_preset`
 
 This directory contains a set of predefined input parameter config files.
 Each config file defines a set of tunable tool parameters, described as JSON objects.
-Here's an example of the config file ([config_fmax_asap7-gcd.json](./config_preset/config_fmax_asap7-gcd.json)).
+Here's an example of the config file.
 
 ```json
 {
-    "CLK_PERIOD": {"type": "float", "minmax": [100, 400], "step": 0 },
-    "CORE_UTIL": {"type": "int", "minmax": [5, 99], "step": 1},
-    "ASPECT_RATIO": {"type": "float", "minmax": [0.1, 2.0], "step": 0 },
-    "CORE_DIE_MARGIN": {"type": "int", "minmax": [2,2], "step": 0 },
-    "GP_PAD": {"type": "int", "minmax": [0,4], "step": 1 },
-    "DP_PAD": {"type": "int", "minmax": [0,4], "step": 1 },
-    "LAYER_ADJUST": {"type": "float", "minmax": [0.1,0.7], "step": 0 },
-    "PLACE_DENSITY_LB_ADDON": {"type": "float", "minmax": [0.00,0.99], "step": 0 },
-    "FLATTEN": {"type": "int", "minmax": [0,1], "step": 1 },
-    "PINS_DISTANCE": {"type": "int", "minmax": [1,3], "step": 1 },
-    "CTS_CLUSTER_SIZE": {"type": "int", "minmax": [10,40], "step": 1 },
-    "CTS_CLUSTER_DIAMETER": {"type": "int", "minmax": [80,120], "step": 1 },
-    "GR_OVERFLOW": {"type": "int", "minmax": [1,1], "step": 0 }
+    "_SDC_FILE_PATH": "constraint.sdc",     // pointer of the base SDC file for modification
+    "_SDC_CLK_PERIOD": {                    // parameter name (clock period) for sweeping/tuning. 
+        "type": "float",                    // parameter type for sweeping/tuning
+        "minmax": [                         // min-to-max range for sweeping/tuning. 
+            1.0,                            // The unit follows the default value of each technology std cell library.
+            3.7439
+        ],
+        "step": 0                           // step ‘0’ for type ‘float’ means continuous step for sweeping/tuning
+    },
+    "CORE_MARGIN": {                        // parameter name (die-to-core margin) for sweeping/tuning
+        "type": "int",
+        "minmax": [
+            2,
+            2
+        ],
+        "step": 0                           // step ‘0’ for type ‘int’ means the constant parameter.
+    },
 }
 ```
 
@@ -61,7 +76,7 @@ Users can manually modify or make their own config JSON file to define the tunab
 
 ### Prerequisite
 
-To run AutoTuner scripts, it requires [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666). 
+To run AutoTuner scripts, it requires [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/a102324a030796b99b164a1f83b54da514860342). 
 Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts and uses Python APIs as well as Ray Tune. Thus, the following are required.
 
 - [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666) and related packages
@@ -71,28 +86,108 @@ Currently, AutoTuner uses OpenROAD flow scripts and METRIC2.1 collection scripts
 
 ### How to Run
 
-1. Place the scripts under the `'flow/util/autotuner` directory in the [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/2e0de4384ca207593c80aa297064f62187b0c666) installed path.
+1. Place the scripts under the `flow/util/` directory in the [OpenROAD-flow-scripts](https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/tree/a102324a030796b99b164a1f83b54da514860342) installed path.
 
-2. Set the input arguments of the scripts.
+2. “distributed.py” scripts handles sweeping and tuning of ORFS parameters.
+ 
+For both sweep and tune modes <mode>:
+    python3 distributed.py -h
+ 
+Note: the order of the parameters matter. Arguments --design, --platform and
+--config are always required and should precede <mode>.
+ 
+AutoTuner:
+    python3 distributed.py tune -h
+Example:
+    python3 distributed.py --design gcd --platform sky130hd \
+                           --config ../designs/sky130hd/gcd/autotuner.json \
+                           tune
+    
+ 
+Parameter sweeping:
+    python3 distributed.py sweep -h
+    Example:
+    python3 distributed.py --design gcd --platform sky130hd \
+                           --config distributed-sweep-example.json \
+                           sweep
 
-    - `-p <platform>`: platform, e.g., `sky130hd`.
-    - `-d <design>`: design, e.g., `ibex`.
-    - `-e <experiment name>`: user-defined experiment name. The experiment workspace will be created in `flow/util/autotuner/results/<experiment name>`.
-    - `-j <number of jobs>`: set the number of concurrent jobs. (**Beware of memory usage**.)
-    - `-n <number of trials>`: set the target number of trials. (**500~1000 is appropriate.)
 
-3. Run Python script at the `flow/` directory.
+3. Run Python script at the `flow/util/` directory.
 
+### List of input arguments
+    
+* Target design
+    - --design
+        - Name of the design for autotuning
+    - --platform
+        - Name of the platform for autotuning
+* Experiment setup
+    - --config
+        - Configuration file that sets which knobs to use for autotuning
+    - --experiment
+        - Experiment name. This parameter is used to prefix the FLOW_VARIANT and to set the Ray log destination
+    - --resume
+        - Resume previous run
+* Git setup
+    - --git-clean
+        - Clean binaries and build files 
+    - --git-clone
+        - Force new git clone
+    - --git-clone-args
+        - Additional git clone arguments
+    - --git-latest
+        - Use the latest version of OR app
+    - --git-or-branch
+        - OR app branch to use
+    - --git-orfs-branch
+        - ORFS branch to use
+    - --git-url
+        - ORFS repo URL to use
+    - --build-args
+        - Additional arguments given to ./build_openroad.sh
+* For AutoTuner
+    - --algorithm
+        - Search algorithm to use for autotuning
+    - --eval
+        - Evaluate function to use with search algorithm
+    - --samples
+        - Number of samples for autotuning
+    - --iterations
+        - Number of iterations for autotuning
+    - --reference
+        - Reference file for use with ‘PPAImprov’ evaluation function
+    - --perturbation
+        - Perturbation interval for PopulationBasedTraining
+    - --seed
+        - Random seed for parameter selection during autotuning
+* Workload
+    - --jobs
+        - Max number of concurrent jobs
+    - --openroad-threads
+        - Max number of threads OR app can use
+    - --server
+        - The address of Ray server to connect
+    - --port
+        - The port of Ray server to connect
+    - -v, --verbose
+        - Verbosity level
+            - 0: only print Ray status
+            - 1: also print training stderr
+            - 2: also print training stdout
 
+    
 ### GUI 
 
 Basically, progress is displayed at the terminal where you run, and when all runs are finished, the results are displayed. 
 You could find the "Best config found" on the screen.
 
-To use TensorBoard GUI, run `tensorboard --logdir=./util/autotuner/results/<experimental name>`. While TensorBoard is running, you can open the webpage http://localhost:6006/ to see the GUI.
+To use TensorBoard GUI, run `tensorboard --logdir=./<logpath>`. While TensorBoard is running, you can open the webpage http://localhost:6006/ to see the GUI.
+    
+
 
 ## Citation
 
 Please cite the following paper.
 
 * J. Jung, A. B. Kahng, S. Kim and R. Varadarajan, "METRICS2.1 and Flow Tuning in the IEEE CEDA Robust Design Flow and OpenROAD", [(.pdf)](https://vlsicad.ucsd.edu/Publications/Conferences/388/c388.pdf), [(.pptx)](https://vlsicad.ucsd.edu/Publications/Conferences/388/c388.pptx), [(.mp4)](https://vlsicad.ucsd.edu/Publications/Conferences/388/c388.mp4), Proc. ACM/IEEE International Conference on Computer-Aided Design, 2021.
+
