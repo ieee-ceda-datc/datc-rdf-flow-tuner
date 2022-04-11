@@ -45,6 +45,7 @@ from ray.tune.suggest.basic_variant import BasicVariantGenerator
 from ray.tune.suggest.hyperopt import HyperOptSearch
 from ray.tune.suggest.nevergrad import NevergradSearch
 from ray.tune.suggest.optuna import OptunaSearch
+from ray.util.queue import Queue
 
 import nevergrad as ng
 from ax.service.ax_client import AxClient
@@ -96,7 +97,7 @@ class AutoTunerBase(tune.Trainable):
             return (99999999999) * (self.step_ / 100)**(-1)
         gamma = (metrics['clk_period'] - metrics['worst_slack']) / 10
         score = metrics['clk_period'] - metrics['worst_slack']
-        score = (self.step_ / 100)**(-1) + gamma * metrics['num_drc']
+        score = score * (self.step_ / 100)**(-1) + gamma * metrics['num_drc']
         return score
 
     @classmethod
@@ -205,6 +206,28 @@ def read_config(file_name):
     def read_sweep(this):
         return [*this['minmax'], this['step']]
 
+    def apply_condition(config, data):
+        # TODO: tune.sample_from only supports random search algorithm.
+        # To make conditional parameter for the other algorithms, different
+        # algorithms should take different methods (will be added)
+        if args.algorithm == 'random':
+            dp_pad_min, dp_pad_max = data['CELL_PAD_IN_SITES_DETAIL_PLACEMENT']['minmax']
+            dp_pad_step = data['CELL_PAD_IN_SITES_DETAIL_PLACEMENT']['step']
+            if dp_pad_step == 1:
+                config['CELL_PAD_IN_SITES_DETAIL_PLACEMENT'] = tune.sample_from(
+                    lambda spec: tune.randint(
+                        dp_pad_min, spec.config.CELL_PAD_IN_SITES_GLOBAL_PLACEMENT + 1))
+            if dp_pad_step > 1:
+                config['CELL_PAD_IN_SITES_DETAIL_PLACEMENT'] = tune.sample_from(
+                    lambda spec: tune.choice(
+                        np.adarray.tolist(
+                            np.arange(
+                                dp_pad_min,
+                                spec.config.CELL_PAD_IN_SITES_GLOBAL_PLACEMENT +
+                                1,
+                                dp_pad_step))))
+        return config
+
     def read_tune(this):
         min_, max_ = this['minmax']
         if min_ == max_:
@@ -217,11 +240,21 @@ def read_config(file_name):
                       'with lowerbound value 0.')
             if this['step'] == 1:
                 return tune.randint(min_, max_)
-            return tune.qrandint(min_, max_, this['step'])
+            return tune.choice(
+                np.adarray.tolist(
+                    np.arange(
+                        config_min,
+                        config_max,
+                        config_step)))
         if this['type'] == 'float':
             if this['step'] == 0:
                 return tune.uniform(min_, max_)
-            return tune.quniform(min_, max_, this['step'])
+            return tune.choice(
+                np.adarray.tolist(
+                    np.arange(
+                        config_min,
+                        config_max,
+                        config_step)))
         return None
 
     def read_tune_ax(name, this):
@@ -242,7 +275,12 @@ def read_config(file_name):
         elif this['type'] == 'float':
             if this['step'] == 1:
                 dict_["type"] = "choice"
-                dict_["values"] = tune.quniform(min_, max_, this['step'])
+                dict_["values"] = tune.choice(
+                    np.adarray.tolist(
+                        np.arange(
+                            config_min,
+                            config_max,
+                            config_step)))
                 dict_["value_type"] = "float"
             else:
                 dict_["type"] = "range"
@@ -254,7 +292,7 @@ def read_config(file_name):
         data = json.load(file)
     sdc_file = ''
     fr_file = ''
-    if args.algorithm == 'ax':
+    if args.mode == 'tune' and args.algorithm == 'ax':
         config = list()
     else:
         config = dict()
@@ -277,7 +315,8 @@ def read_config(file_name):
             config[key] = read_tune(value)
         elif args.mode == 'tune' and args.algorithm == 'ax':
             config.append(read_tune_ax(key, value))
-    # Copy back to global variables
+    if args.mode == 'tune':
+        config = apply_condition(config, data)
     return config, sdc_file, fr_file
 
 
@@ -322,10 +361,15 @@ def write_sdc(variables, path):
     new_file = SDC_ORIGINAL
     for key, value in variables.items():
         if key == 'CLK_PERIOD':
-            new_file = re.sub(r'-period [0-9\.]+ (.*)',
+            if new_file.find('set clk_period') != -1:
+                new_file = re.sub(r'set clk_period .*\n(.*)',
+                                  f'set clk_period {value}\n\\1',
+                                  new_file)
+            else:
+                new_file = re.sub(r'-period [0-9\.]+ (.*)',
                               f'-period {value} \\1',
                               new_file)
-            new_file = re.sub(r'-waveform [{}\s0-9\.]+[\s|\n]',
+                new_file = re.sub(r'-waveform [{}\s0-9\.]+[\s|\n]',
                               '',
                               new_file)
         elif key == 'UNCERTAINTY':
@@ -442,7 +486,7 @@ def openroad(base_dir, parameters, path=''):
     make_command += f'make -C {base_dir}/flow DESIGN_CONFIG=designs/'
     make_command += f'{args.platform}/{args.design}/config.mk'
     make_command += f' FLOW_VARIANT={flow_variant} {parameters}'
-    make_command += f' NPROC={args.openroad_threads}'
+    make_command += f' NPROC={args.openroad_threads} SHELL=bash'
     run_command(make_command,
                 stderr_file=f'{log_path}error-make-finish.log',
                 stdout_file=f'{log_path}make-finish-stdout.log')
@@ -713,8 +757,7 @@ def set_algorithm(experiment_name, config):
             minimize=True
         )
         algorithm = AxSearch(ax_client=ax_client,
-                             points_to_evaluate=best_params,
-                             max_concurrent=args.jobs)
+                             points_to_evaluate=best_params)
     elif args.algorithm == 'nevergrad':
         algorithm = NevergradSearch(
             points_to_evaluate=best_params,
@@ -728,7 +771,7 @@ def set_algorithm(experiment_name, config):
             time_attr="training_iteration",
             perturbation_interval=args.perturbation,
             hyperparam_mutations=config,
-            synch=False
+            synch=True
         )
     elif args.algorithm == 'random':
         algorithm = BasicVariantGenerator(max_concurrent=args.jobs)
@@ -771,9 +814,19 @@ def save_best(best_config):
     print(f'[INFO TUN-0003] Best parameters written to {new_best_path}')
 
 
+@ray.remote
+def consumer(queue):
+    ''' consumer '''
+    while not queue.empty():
+        next_item = queue.get()
+        name = next_item[1]
+        print(f'[INFO TUN-0007] Scheduling run for parameter {name}.')
+        ray.get(openroad_distributed.remote(*next_item))
+        print(f'[INFO TUN-0008] Finished run for parameter {name}.')
+
+
 def sweep():
     ''' Run sweep of parameters '''
-    workers = list()
     if args.server is not None:
         # For remote sweep we create the following directory structure:
         #      1/     2/         3/       4/
@@ -782,17 +835,16 @@ def sweep():
     else:
         repo_dir = abspath('../')
     print(f'[INFO TUN-0012] Log dir {LOCAL_DIR}.')
+    queue = Queue()
     for name, content in config_dict.items():
         if not isinstance(content, list):
             continue
-        print(f'[INFO TUN-0007] Scheduling runs for parameter {name}.')
         for i in np.arange(*content):
             config_dict[name] = i
-            workers.append(openroad_distributed.remote(repo_dir, config_dict,
-                                                       LOCAL_DIR))
-        print(f'[INFO TUN-0008] Finish scheduling for parameter {name}.')
+            queue.put([repo_dir, config_dict, LOCAL_DIR])
+    workers = [consumer.remote(queue) for _ in range(args.jobs)]
     print('[INFO TUN-0009] Waiting for results.')
-    _ = ray.get(workers)
+    ray.get(workers)
     print('[INFO TUN-0010] Sweep complete.')
 
 
@@ -847,9 +899,9 @@ if __name__ == '__main__':
             local_dir=LOCAL_DIR,
             resume=args.resume,
             stop={"training_iteration": args.iterations},
-            queue_trials=True,
         )
         if args.algorithm == 'pbt':
+            os.environ["TUNE_MAX_PENDING_TRIALS_PG"] = str(args.jobs)
             tune_args['scheduler'] = search_algo
         else:
             tune_args['search_alg'] = search_algo
